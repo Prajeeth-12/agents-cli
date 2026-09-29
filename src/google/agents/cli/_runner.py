@@ -235,6 +235,7 @@ def run_resolved(
 
     Raises:
         ToolNotFoundError: If resolve_executable is True and the tool cannot be found.
+        click.ClickException: If the OS denies permission to execute the program.
 
     Returns:
         CompletedProcess instance.
@@ -248,7 +249,12 @@ def run_resolved(
         args = args.copy()
         args[0] = _tools.require_tool(executable)
 
-    return subprocess.run(args, **kwargs)
+    try:
+        return subprocess.run(args, **kwargs)
+    except PermissionError as e:
+        raise click.ClickException(
+            f"Permission denied running '{args[0]}': {e}"
+        ) from e
 
 
 def popen_resolved(
@@ -264,6 +270,7 @@ def popen_resolved(
 
     Raises:
         ToolNotFoundError: If resolve_executable is True and the tool cannot be found.
+        click.ClickException: If the OS denies permission to execute the program.
 
     Returns:
         Popen instance.
@@ -277,7 +284,12 @@ def popen_resolved(
         args = args.copy()
         args[0] = _tools.require_tool(executable)
 
-    return subprocess.Popen(args, **kwargs)
+    try:
+        return subprocess.Popen(args, **kwargs)
+    except PermissionError as e:
+        raise click.ClickException(
+            f"Permission denied running '{args[0]}': {e}"
+        ) from e
 
 
 def popen_resolved_detached(
